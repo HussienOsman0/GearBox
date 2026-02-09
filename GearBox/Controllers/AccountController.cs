@@ -9,9 +9,9 @@ namespace GearBox.Controllers
     public class AccountController : Controller
     {
         private readonly IAccountService _accountService;
-        private readonly UserManager<ApplicationUser> _userManager; // تعريف المتغير
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        // 3. حقن UserManager في الكونستركتور
+        
         public AccountController(IAccountService accountService, UserManager<ApplicationUser> userManager)
         {
             _accountService = accountService;
@@ -60,23 +60,23 @@ namespace GearBox.Controllers
         {
             if (ModelState.IsValid)
             {
-                // 1. محاولة تسجيل الدخول
+                
                 var result = await _accountService.LoginAsync(model);
 
                 if (result.Succeeded)
                 {
-                    // 2. نجيب بيانات اليوزر عشان نعرف الرول بتاعته
+                    
                     var user = await _userManager.FindByEmailAsync(model.Email);
 
-                    // 3. فحص الرول والتوجيه
+                    
                     if (await _userManager.IsInRoleAsync(user, "Provider"))
                     {
-                        // لو بروفيدر -> وديه Dashboard
+                        
                         return RedirectToAction("Index", "Provider");
                     }
                     else
                     {
-                        // لو عميل -> وديه الصفحة الرئيسية
+                        
                         return RedirectToAction("Index", "Client");
                     }
                 }

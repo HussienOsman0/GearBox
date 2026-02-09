@@ -1,0 +1,85 @@
+﻿@using DAL.Enums
+@model IEnumerable<DAL.Models.Booking>
+
+@{
+    ViewData["Title"] = "Provider Dashboard";
+}
+
+<div class="container-fluid">
+    <h2 class="mb-4">Dashboard Overview</h2>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-warning mb-3 shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Pending Requests</h5>
+                    <p class="card-text display-4">@ViewBag.PendingCount</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-info mb-3 shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Today's Jobs</h5>
+                    <p class="card-text display-4">@ViewBag.TodayBookings</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-success mb-3 shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Total Bookings</h5>
+                    <p class="card-text display-4">@ViewBag.TotalBookings</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">Recent Incoming Requests</h5>
+        </div>
+        <div class="card-body p-0">
+            @if (!Model.Any())
+            {
+                <div class="p-4 text-center text-muted">No bookings found yet.</div>
+            }
+            else
+            {
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Client</th>
+                            <th>Vehicle</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.Client?.FullName</td>
+                                <td>@item.Vehicle?.make</td>
+                                <td>@item.BookingDate.ToString("MMM dd, hh:mm tt")</td>
+
+                                <td>
+                                    <span class="badge @(item.Status == BookingStatus.Pending ? "bg-warning text-dark" : "bg-secondary")">
+                                        @item.Status
+                                    </span>
+                                </td>
+                                <td>
+                                    <a asp-action="ManageBookings" class="btn btn-sm btn-outline-primary">View Details</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+        <div class="card-footer text-center bg-white">
+            <a asp-action="ManageBookings" class="text-decoration-none">View All Bookings &rarr;</a>
+        </div>
+    </div>
+</div>

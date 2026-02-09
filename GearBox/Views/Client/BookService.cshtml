@@ -1,0 +1,160 @@
+﻿@model BLL.View_models.BookingVM
+
+@{
+    ViewData["Title"] = "Book Service";
+}
+
+<style>
+    .booking-container {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 0;
+    }
+
+    .booking-card {
+        border: none;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .booking-header {
+        background: linear-gradient(135deg, #0d6efd 0%, #0043a8 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+        position: relative;
+    }
+
+    .provider-avatar {
+        width: 80px;
+        height: 80px;
+        background: white;
+        color: #0d6efd;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .form-control:focus, .form-select:focus {
+        box-shadow: none;
+        border-color: #0d6efd;
+    }
+
+    .input-group-text {
+        background-color: #f1f3f5;
+        border: 1px solid #ced4da;
+        border-right: none;
+        color: #495057;
+    }
+
+    .form-control, .form-select {
+        border-left: none;
+        background-color: #fff;
+    }
+
+    .btn-confirm {
+        background-color: #198754; /* لون أخضر للتأكيد */
+        color: white;
+        font-weight: 600;
+        border: none;
+        transition: all 0.3s;
+        border-radius: 10px;
+    }
+
+        .btn-confirm:hover {
+            background-color: #157347;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(25, 135, 84, 0.3);
+        }
+
+    .add-car-link {
+        font-size: 0.9rem;
+        text-decoration: none;
+        color: #0d6efd;
+        font-weight: 500;
+    }
+
+        .add-car-link:hover {
+            text-decoration: underline;
+        }
+</style>
+
+<div class="container booking-container">
+    <div class="col-md-6 col-lg-5">
+        <div class="card booking-card shadow-lg">
+
+            <div class="booking-header">
+                <div class="provider-avatar">
+                    <i class="fas fa-tools fa-2x"></i>
+                </div>
+                <h5 class="text-uppercase letter-spacing-1 opacity-75 small mb-1">Service Request</h5>
+                <h3 class="fw-bold mb-0">@Model.ProviderName</h3>
+            </div>
+
+            <div class="card-body p-4 p-md-5 bg-white">
+                <form asp-action="BookService" method="post">
+
+                    <input type="hidden" asp-for="ProviderId" />
+                    <input type="hidden" asp-for="ProviderName" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger small mb-3"></div>
+
+                    <div class="mb-4">
+                        <label asp-for="BookingDate" class="form-label fw-bold text-secondary small text-uppercase">Appointment Date</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                            <input asp-for="BookingDate" class="form-control" type="datetime-local" />
+                        </div>
+                        <span asp-validation-for="BookingDate" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label asp-for="VehicleId" class="form-label fw-bold text-secondary small text-uppercase mb-0">Select Vehicle</label>
+                            <a asp-action="AddVehicle" class="add-car-link">
+                                <i class="fas fa-plus-circle me-1"></i>New Vehicle
+                            </a>
+                        </div>
+
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-car"></i></span>
+                            <select asp-for="VehicleId"
+                                    class="form-select"
+                                    asp-items="ViewBag.Vehicles">
+                                <option value="">-- Choose your car --</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="VehicleId" class="text-danger small"></span>
+
+                        @if (ViewBag.Vehicles == null || !((IEnumerable<dynamic>)ViewBag.Vehicles).Any())
+                        {
+                            <div class="alert alert-warning mt-2 small p-2">
+                                <i class="fas fa-exclamation-triangle me-1"></i> You have no registered vehicles. Please add one first.
+                            </div>
+                        }
+                    </div>
+
+                    <hr class="my-4 opacity-25">
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-confirm btn-lg py-3">
+                            Confirm Booking <i class="fas fa-check-circle ms-2"></i>
+                        </button>
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-light text-muted">
+                            Cancel
+                        </a>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

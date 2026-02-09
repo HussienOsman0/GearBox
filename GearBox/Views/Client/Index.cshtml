@@ -1,0 +1,330 @@
+﻿@using DAL.Enums
+@model BLL.View_models.ClientHomeVM
+
+@{
+    ViewData["Title"] = "My Dashboard";
+}
+
+<style>
+    .dashboard-banner {
+        background: linear-gradient(135deg, #0d6efd 0%, #0043a8 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 40px 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 20px rgba(13, 110, 253, 0.2);
+    }
+
+    .section-card {
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        height: 100%;
+        transition: transform 0.3s;
+    }
+
+    .section-header {
+        background-color: white;
+        border-bottom: 1px solid #f1f1f1;
+        padding: 20px 25px;
+    }
+
+    /* Vehicles Styling */
+    .vehicle-item {
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        padding: 15px;
+        transition: all 0.2s;
+    }
+
+        .vehicle-item:hover {
+            background-color: #e7f1ff;
+            border-color: #cff4fc;
+            transform: translateX(5px);
+        }
+
+    .vehicle-icon {
+        width: 40px;
+        height: 40px;
+        background-color: #fff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #0d6efd;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    /* Table Styling */
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .status-badge {
+        font-size: 0.85rem;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 500;
+        display: inline-block;
+    }
+
+    /* Provider Card Styling (New) */
+    .provider-card {
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+        .provider-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+        }
+</style>
+
+<div class="container py-4">
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="dashboard-banner d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h2 class="fw-bold mb-1">Hello, @Model.ClientName 👋</h2>
+            <p class="mb-0 opacity-75">Track your repairs and manage your vehicles easily.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="EditProfile" class="btn btn-outline-light fw-bold shadow-sm px-4 py-2 rounded-pill">
+                <i class="fas fa-user-edit me-2"></i>Edit Profile
+            </a>
+
+            <a href="#providers-section" class="btn btn-light text-primary fw-bold shadow-sm px-4 py-2 rounded-pill">
+                <i class="fas fa-arrow-down me-2"></i>Book New Service
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-lg-4">
+            <div class="card section-card shadow-sm">
+                <div class="section-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold text-dark"><i class="fas fa-warehouse me-2 text-warning"></i>My Garage</h5>
+                    <a asp-action="AddVehicle" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                        <i class="fas fa-plus small me-1"></i>Add
+                    </a>
+                </div>
+                <div class="card-body">
+                    @if (!Model.Vehicles.Any())
+                    {
+                        <div class="text-center text-muted py-4">
+                            <div class="mb-3 opacity-50">
+                                <i class="fas fa-car fa-3x"></i>
+                            </div>
+                            <h6 class="fw-bold">No vehicles yet</h6>
+                            <small>Add your car to book services faster.</small>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="vehicle-list">
+                            @foreach (var car in Model.Vehicles)
+                            {
+                                <div class="vehicle-item d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="vehicle-icon">
+                                            <i class="fas fa-car-side"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold mb-0 text-dark">@car.make</h6>
+                                            <small class="text-muted" style="font-size: 0.75rem;">Vehicle ID: #@car.Id</small>
+                                        </div>
+                                    </div>
+                                    <i class="fas fa-chevron-right text-muted small opacity-50"></i>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card section-card shadow-sm">
+                <div class="section-header">
+                    <h5 class="mb-0 fw-bold text-dark"><i class="fas fa-history me-2 text-primary"></i>Recent Activity</h5>
+                </div>
+                <div class="card-body p-0">
+                    @if (!Model.Bookings.Any())
+                    {
+                        <div class="text-center py-5">
+                            <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" width="80" class="mb-3 opacity-25" />
+                            <h5 class="text-muted">No bookings found</h5>
+                            <p class="text-muted small">Your service history will appear here.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light text-muted small text-uppercase">
+                                    <tr>
+                                        <th class="ps-4 py-3">Provider</th>
+                                        <th class="py-3">Date & Time</th>
+                                        <th class="py-3">Vehicle</th>
+                                        <th class="py-3 text-center">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.Bookings)
+                                    {
+                                        <tr>
+                                            <td class="ps-4">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="bg-light rounded p-2 me-2 text-primary">
+                                                        <i class="fas fa-user-cog"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-bold text-dark">@item.Provider?.FullName</div>
+                                                        <small class="text-muted">@item.Provider?.Type</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="fw-bold text-dark">@item.BookingDate.ToString("MMM dd, yyyy")</div>
+                                                <small class="text-muted"><i class="far fa-clock me-1"></i>@item.BookingDate.ToString("hh:mm tt")</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-light text-dark border fw-normal">
+                                                    @item.Vehicle?.make
+                                                </span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="status-badge @GetStatusClass(item.Status)">
+                                                    @GetStatusIcon(item.Status) @item.Status
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+                <div class="card-footer bg-white text-center border-top-0 py-3">
+                    <small class="text-muted">Showing recent requests</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" id="providers-section">
+        <div class="col-12 mb-4">
+            <div class="d-flex align-items-center">
+                <h4 class="fw-bold mb-0 text-dark">
+                    <i class="fas fa-tools me-2 text-warning"></i>Available Providers
+                </h4>
+                @if (Model.Providers != null)
+                {
+                    <span class="badge bg-light text-muted ms-3 border">@Model.Providers.Count() found</span>
+                }
+            </div>
+        </div>
+
+        @if (Model.Providers == null || !Model.Providers.Any())
+        {
+            <div class="col-12">
+                <div class="alert alert-info text-center py-4">
+                    <i class="fas fa-info-circle me-2"></i> No service providers are available at the moment. Please check back later.
+                </div>
+            </div>
+        }
+        else
+        {
+            @foreach (var provider in Model.Providers)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm border-0 provider-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="card-title fw-bold text-dark mb-1">@provider.FullName</h5>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle">
+                                        @provider.Type Specialist
+                                    </span>
+                                </div>
+                                <div class="bg-light rounded-circle p-2 text-muted">
+                                    <i class="fas fa-wrench"></i>
+                                </div>
+                            </div>
+
+                            <hr class="my-3 opacity-25" />
+
+                            <h6 class="text-uppercase text-muted small fw-bold mb-3">Services:</h6>
+
+                            @if (provider.Services != null && provider.Services.Any())
+                            {
+                                <ul class="list-unstyled mb-0">
+                                    @foreach (var service in provider.Services.Take(2))
+                                    {
+                                        <li class="d-flex justify-content-between mb-2 small">
+                                            <span><i class="fas fa-check text-success me-2"></i>@service.Name</span>
+                                            <span class="fw-bold">@service.Price.ToString("C0")</span>
+                                        </li>
+                                    }
+                                    @if (provider.Services.Count > 2)
+                                    {
+                                        <li class="text-center small text-muted mt-2">
+                                            +@(provider.Services.Count - 2) more services
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <p class="text-muted small fst-italic">Contact for details</p>
+                            }
+                        </div>
+
+                        <div class="card-footer bg-white border-top-0 pb-4 px-4 pt-0">
+                            <a asp-action="BookService"
+                               asp-route-providerId="@provider.Id"
+                               class="btn btn-primary w-100 fw-bold py-2 rounded-pill shadow-sm">
+                                Book Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+</div>
+
+@functions {
+    string GetStatusClass(BookingStatus status)
+    {
+        return status switch
+        {
+            BookingStatus.Pending => "bg-warning text-dark bg-opacity-25 border border-warning",
+            BookingStatus.Approved => "bg-primary text-primary bg-opacity-10 border border-primary-subtle",
+            BookingStatus.Completed => "bg-success text-success bg-opacity-10 border border-success-subtle",
+            BookingStatus.Rejected => "bg-danger text-danger bg-opacity-10 border border-danger-subtle",
+            _ => "bg-secondary text-secondary bg-opacity-10"
+        };
+    }
+
+    string GetStatusIcon(BookingStatus status)
+    {
+        return status switch
+        {
+            BookingStatus.Pending => "⏳",
+            BookingStatus.Approved => "👍",
+            BookingStatus.Completed => "✅",
+            BookingStatus.Rejected => "❌",
+            _ => "▪️"
+        };
+    }
+}

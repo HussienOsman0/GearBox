@@ -1,0 +1,107 @@
+﻿@using DAL.Enums
+@model BLL.View_models.VehicleVM
+
+@{
+    ViewData["Title"] = "Add New Vehicle";
+}
+
+<style>
+    .vehicle-container {
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .vehicle-card {
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .vehicle-header {
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%); /* لون أزرق مميز للعميل */
+        color: white;
+        padding: 25px 20px;
+        text-align: center;
+    }
+
+    .form-select:focus {
+        box-shadow: none;
+        border-color: #0d6efd;
+    }
+
+    .input-group-text {
+        background-color: #f8f9fa;
+        color: #0d6efd;
+        border-right: none;
+    }
+
+    .form-select {
+        border-left: none;
+        background-color: #f8f9fa;
+    }
+
+    .btn-save {
+        background-color: #0d6efd;
+        color: white;
+        font-weight: 600;
+        border: none;
+        transition: all 0.3s;
+    }
+
+        .btn-save:hover {
+            background-color: #0b5ed7;
+            transform: translateY(-2px);
+        }
+</style>
+
+<div class="container vehicle-container">
+    <div class="col-md-5">
+        <div class="card vehicle-card shadow-lg">
+
+            <div class="vehicle-header">
+                <div class="mb-3">
+                    <div class="bg-white text-primary d-inline-block p-3 rounded-circle shadow-sm">
+                        <i class="fas fa-car fa-2x"></i>
+                    </div>
+                </div>
+                <h4 class="fw-bold mb-0">Register Your Vehicle</h4>
+                <p class="small opacity-75 mb-0">Select your car manufacturer to proceed</p>
+            </div>
+
+            <div class="card-body p-4">
+                <form asp-action="AddVehicle" method="post">
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger small mb-3"></div>
+
+                    <div class="mb-4">
+                        <label asp-for="Make" class="form-label small fw-bold text-muted ms-1">Car Make</label>
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text"><i class="fas fa-steering-wheel"></i></span>
+                            <select asp-for="Make"
+                                    class="form-select"
+                                    asp-items="Html.GetEnumSelectList<Make>()">
+                                <option value="">-- Select Manufacturer --</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="Make" class="text-danger small ms-1"></span>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-save btn-lg py-2 shadow-sm">
+                            <i class="fas fa-plus-circle me-2"></i> Add Vehicle
+                        </button>
+                        <a asp-controller="Client" asp-action="Index" class="btn btn-light text-muted border-0">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

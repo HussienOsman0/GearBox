@@ -1,0 +1,229 @@
+﻿@using DAL.Enums
+@model IEnumerable<DAL.Models.Booking>
+
+@{
+    ViewData["Title"] = "Incoming Bookings";
+}
+
+<style>
+    .bookings-container {
+        min-height: 80vh;
+        padding: 40px 0;
+    }
+
+    .card-dashboard {
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    .card-header-custom {
+        background: linear-gradient(135deg, #212529 0%, #343a40 100%);
+        color: white;
+        padding: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .table thead th {
+        background-color: #f8f9fa;
+        color: #6c757d;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        border-bottom: 2px solid #e9ecef;
+        padding: 15px;
+    }
+
+    .table tbody td {
+        vertical-align: middle;
+        padding: 15px;
+    }
+
+    .client-avatar {
+        width: 40px;
+        height: 40px;
+        background-color: #e9ecef;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #495057;
+        margin-right: 10px;
+    }
+
+    .action-btn {
+        width: 35px;
+        height: 35px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        transition: all 0.2s;
+        border: none;
+    }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+
+    .status-badge {
+        padding: 8px 12px;
+        border-radius: 30px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+</style>
+
+<div class="container bookings-container">
+    <div class="card card-dashboard">
+
+        <div class="card-header-custom">
+            <div>
+                <h4 class="mb-1 fw-bold"><i class="fas fa-clipboard-list me-2"></i>Manage Bookings</h4>
+                <p class="mb-0 opacity-75 small">Review and manage client requests</p>
+            </div>
+            <div class="badge bg-warning text-dark px-3 py-2 rounded-pill shadow-sm">
+                <i class="fas fa-bell me-1"></i> @Model.Count(m => m.Status == BookingStatus.Pending) Pending
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5">
+                    <div class="opacity-25 mb-3">
+                        <i class="fas fa-inbox fa-4x"></i>
+                    </div>
+                    <h5 class="text-muted">No booking requests yet.</h5>
+                    <p class="small text-muted">New orders will appear here.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">Client Details</th>
+                                <th>Vehicle Info</th>
+                                <th>Date & Time</th>
+                                <th>Status</th>
+                                <th class="text-end pe-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="client-avatar shadow-sm">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold text-dark">@item.Client?.FullName</div>
+                                                <small class="text-muted" style="font-size: 0.75rem;">Client ID: #@item.ClientId</small>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <div class="d-flex align-items-center text-dark">
+                                            <i class="fas fa-car-side me-2 text-secondary"></i>
+                                            <span class="fw-bold">@item.Vehicle?.make</span>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            <span class="fw-bold text-dark">@item.BookingDate.ToString("MMM dd, yyyy")</span>
+                                            <small class="text-muted"><i class="far fa-clock me-1"></i>@item.BookingDate.ToString("hh:mm tt")</small>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <span class="status-badge @GetStatusClass(item.Status)">
+                                            <i class="fas @GetIconClass(item.Status)"></i> @item.Status
+                                        </span>
+                                    </td>
+
+                                    <td class="text-end pe-4">
+
+                                        @if (item.Status == BookingStatus.Pending)
+                                        {
+                                            <div class="d-flex gap-2 justify-content-end">
+                                                <form asp-action="UpdateStatus" method="post" class="d-inline">
+                                                    <input type="hidden" name="bookingId" value="@item.Id" />
+                                                    <input type="hidden" name="status" value="@BookingStatus.Approved" />
+                                                    <button type="submit" class="action-btn btn-success shadow-sm" title="Accept Request">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                </form>
+
+                                                <form asp-action="UpdateStatus" method="post" class="d-inline">
+                                                    <input type="hidden" name="bookingId" value="@item.Id" />
+                                                    <input type="hidden" name="status" value="@BookingStatus.Rejected" />
+                                                    <button type="submit" class="action-btn btn-danger shadow-sm" title="Reject Request">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        }
+                                        else if (item.Status == BookingStatus.Approved)
+                                        {
+                                            <form asp-action="UpdateStatus" method="post">
+                                                <input type="hidden" name="bookingId" value="@item.Id" />
+                                                <input type="hidden" name="status" value="@BookingStatus.Completed" />
+                                                <button type="submit" class="btn btn-sm btn-info text-white fw-bold shadow-sm px-3" title="Mark as Completed">
+                                                    <i class="fas fa-check-double me-1"></i> Complete Job
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small fst-italic">No actions</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetStatusClass(BookingStatus status)
+    {
+        return status switch
+        {
+            BookingStatus.Pending => "bg-warning bg-opacity-10 text-warning-emphasis border border-warning border-opacity-25",
+            BookingStatus.Approved => "bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25",
+            BookingStatus.Completed => "bg-success bg-opacity-10 text-success border border-success border-opacity-25",
+            BookingStatus.Rejected => "bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25",
+            _ => "bg-secondary bg-opacity-10 text-secondary"
+        };
+    }
+
+    // الدالة المعدلة: ترجع اسم الكلاس فقط
+    string GetIconClass(BookingStatus status)
+    {
+        return status switch
+        {
+            BookingStatus.Pending => "fa-hourglass-half",
+            BookingStatus.Approved => "fa-thumbs-up",
+            BookingStatus.Completed => "fa-check-circle",
+            BookingStatus.Rejected => "fa-ban",
+            _ => "fa-circle"
+        };
+    }
+}
